@@ -71,7 +71,7 @@ void ClientDisconnect(edict_t *ent);
 void Use_Item(edict_t *ent, edict_t *other, edict_t *activator);
 
 // weapon functions
-int WeapIndex(int weap);
+//int WeapIndex(int weap);
 void Weapon_DesertEagle(edict_t *self);																//CW
 void Weapon_GaussPistol(edict_t *self);
 void Weapon_Jackhammer(edict_t *self);
@@ -113,7 +113,7 @@ float SetBotXYSpeed(edict_t *ent, float *xyspeed);
 void SetBotThink(edict_t *ent);
 void CheckBotCrushed(edict_t *targ,edict_t *inflictor,int mod);
 void Bot_CheckEnemy(gclient_t *client, edict_t *attacker, edict_t *targ, int mod);
-void BotCheckGrapple(edict_t *ent);
+//void BotCheckGrapple(edict_t *ent);
 
 //CW++
 qboolean TraceX(edict_t *ent, vec3_t p2);

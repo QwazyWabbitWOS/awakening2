@@ -173,18 +173,20 @@ void SP_model_spawn(edict_t *ent)
 	// Change framenumbers to last frame to play
 	ent->framenumbers += ent->startframe;
 
-	if (ent->bleft)
+	//QW ent->bleft is a vec3_t, not a pointer, so the check should verify the vector is not all zeros.
+	if (!VectorCompare(ent->bleft, vec3_origin))
 		VectorCopy(ent->bleft, ent->mins);
 	else
 	{
-		if (ent->solid != SOLID_NOT)
+		if (ent->solid != SOLID_NOT) //QW Can these checks ever trigger?
 		{
 			gi.dprintf("%s solid with no bleft vector at %s\n", ent->classname, vtos(ent->s.origin));
 			ent->solid = SOLID_NOT;
 		}
 	}
 
-	if (ent->tright)
+	//QW ent->tright is a vec3_t, not a pointer, so the check should verify the vector is not all zeros.
+	if (!VectorCompare(ent->tright, vec3_origin))
 		VectorCopy (ent->tright, ent->maxs);
 	else
 	{

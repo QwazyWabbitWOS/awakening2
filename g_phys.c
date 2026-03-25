@@ -129,9 +129,10 @@ qboolean SV_RunThink(edict_t *ent)
 		gi.error("SV_RunThink()");
 //CW--
 	}
-
-	ent->think(ent);
-
+	else
+	{
+		ent->think(ent);
+	}
 	return false;
 }
 
@@ -464,7 +465,10 @@ qboolean SV_Push(edict_t *pusher, vec3_t move, vec3_t amove)
 	int			i;
 	int			e;
 
-//	Clamp the move to 1/8 units, so the position will be accurate for client side prediction.
+	if (!pusher)
+		return false;
+
+	//	Clamp the move to 1/8 units, so the position will be accurate for client side prediction.
 
 	for (i = 0; i < 3; i++)
 	{

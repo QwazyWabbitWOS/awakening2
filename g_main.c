@@ -426,7 +426,7 @@ void ClientUserinfoChanged(edict_t *ent, char *userinfo);
 void ClientDisconnect(edict_t *ent);
 void ClientBegin(edict_t *ent);
 void ClientCommand(edict_t *ent);
-void RunEntity(edict_t *ent);
+void G_RunEntity(edict_t *ent);
 void WriteGame(char *filename, qboolean autosave);
 void ReadGame(char *filename);
 void WriteLevel(char *filename);
@@ -551,7 +551,7 @@ void ClientEndServerFrames(void)
 			else if (Q_stricmp(ent->client->pers.netname, ent->client->pers.old_name))
 			{
 				gi_bprintf(PRINT_CHAT, "%s is now known as %s\n", ent->client->pers.old_name, ent->client->pers.netname);
-				strncpy(ent->client->pers.old_name, ent->client->pers.netname, sizeof(ent->client->pers.netname)-1);
+				Q_strncpyz(ent->client->pers.old_name, sizeof(ent->client->pers.old_name), ent->client->pers.netname);
 			}
 		}
 //CW--
@@ -615,7 +615,7 @@ char *FindNextMap(FILE *iostream)
 					found_first = false;
 					while (!found_first)
 					{
-						fscanf(iostream, "%s", bspname);
+						fnum = fscanf(iostream, "%s", bspname);
 						if ((bspname[0] == '/') && (bspname[1] == '/'))
 							continue;
 						else
@@ -633,7 +633,7 @@ char *FindNextMap(FILE *iostream)
 				found_first = false;
 				while (!found_first)
 				{
-					fscanf(iostream, "%s", bspname);
+					fnum = fscanf(iostream, "%s", bspname);
 					if ((bspname[0] == '/') && (bspname[1] == '/'))
 						continue;
 					else
@@ -753,7 +753,7 @@ char *FindRandomMap(FILE *iostream)
 		else	// no different maps, so replay the current one
 		{
 			gi.dprintf("** Map list has no different maps\n");
-			sprintf(bspname, level.mapname);
+			Com_sprintf(bspname, sizeof bspname, level.mapname);
 		}
 	}
 	else
@@ -802,7 +802,7 @@ void EndDMLevel(void)
 				else
 					sprintf(endmsg, "%s", asltgame.msg_attack);
 
-				free(asltgame.msg_attack);
+				gi.TagFree(asltgame.msg_attack);
 			}
 			else
 				sprintf(endmsg, "The Attackers have won.");
@@ -818,7 +818,7 @@ void EndDMLevel(void)
 				else
 					sprintf(endmsg, "%s", asltgame.msg_defend);
 
-				free(asltgame.msg_defend);
+				gi.TagFree(asltgame.msg_defend);
 			}
 			else
 				sprintf(endmsg, "The Defenders have won.");
@@ -940,7 +940,7 @@ void CheckDMRules(void)
 		if (!teamgame.match)
 		{
 			t = (int)(((timelimit->value * 60.0) + level.starttime) - level.time);
-			sprintf(text, "%02d:%02d", (int)(t / 60), (int)(t % 60));
+			Com_sprintf(text, sizeof text, "%02d:%02d", (int)(t / 60), (int)(t % 60));
 			gi.configstring(CONFIG_CTF_MATCH, text);
 		}
 		else

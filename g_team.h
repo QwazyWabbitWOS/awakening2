@@ -188,8 +188,8 @@ void CTFResetTech(void);
 
 void CTFOpenJoinMenu(edict_t *ent);
 qboolean CTFStartClient(edict_t *ent);
-void CTFVoteYes(edict_t *ent);
-void CTFVoteNo(edict_t *ent);
+//void CTFVoteYes(edict_t *ent);
+//void CTFVoteNo(edict_t *ent);
 void CTFReady(edict_t *ent);
 void CTFNotReady(edict_t *ent);
 qboolean CTFNextMap(void);

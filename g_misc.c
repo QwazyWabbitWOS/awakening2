@@ -458,7 +458,7 @@ Used as a positional target for spotlights, etc.
 void SP_info_null(edict_t *self)
 {
 	G_FreeEdict(self);
-};
+}
 
 
 /*QUAKED info_notnull (0 0.5 0) (-4 -4 -4) (4 4 4)
@@ -484,7 +484,7 @@ void SP_info_notnull(edict_t *self)
 		gi.linkentity(self);
 	}
 //CW--
-};
+}
 
 //CW++
 /*QUAKED info_timelimit (0 0.5 0.5) (-8 -8 -8) (8 8 8)
@@ -498,7 +498,7 @@ void SP_info_timelimit(edict_t *self)
 		gi.cvar_forceset("timelimit", va("%f", self->wait));
 	
 	G_FreeEdict(self);
-};
+}
 
 /*QUAKED info_mission (0 1 0.5) (-8 -8 -8) (8 8 8)
 Describes a mission objective for an Assault map.
@@ -537,7 +537,7 @@ void SP_info_nohook(edict_t *self)
 {
 	level.nohook = true;
 	G_FreeEdict(self);
-};
+}
 //CW--
 
 
@@ -1507,17 +1507,17 @@ void target_string_use(edict_t *self, edict_t *other, edict_t *activator)
 {
 	edict_t *e;
 	int		n;
-	int		l;
+	int		len;
 	char	c;
 
-	l = strlen(self->message);
+	len = (int)strlen(self->message);
 	for (e = self->teammaster; e; e = e->teamchain)
 	{
 		if (!e->count)
 			continue;
 
 		n = e->count - 1;
-		if (n > l)
+		if (n > len)
 		{
 			e->s.frame = 12;
 			continue;

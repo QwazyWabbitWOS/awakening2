@@ -34,7 +34,7 @@ pmenuhnd_t *PMenu_Open(edict_t *ent, pmenu_t *entries, int cur, int num, void *a
 	for (i = 0; i < num; i++)
 	{
 		if (entries[i].text)
-			hnd->entries[i].text = strdup(entries[i].text);
+			hnd->entries[i].text = G_CopyString(entries[i].text);
 	}
 	hnd->num = num;
 
@@ -76,7 +76,7 @@ void PMenu_Close(edict_t *ent)
 	for (i = 0; i < hnd->num; i++)
 	{
 		if (hnd->entries[i].text)
-			free(hnd->entries[i].text);
+			gi.TagFree(hnd->entries[i].text);
 	}
 
 	gi.TagFree(hnd->entries);																		//CW
@@ -91,12 +91,12 @@ void PMenu_Close(edict_t *ent)
 }
 
 // only use on pmenu's that have been called with PMenu_Open
-void PMenu_UpdateEntry(pmenu_t *entry, const char *text, int align, SelectFunc_t SelectFunc)
+void PMenu_UpdateEntry(pmenu_t *entry, char *text, int align, SelectFunc_t SelectFunc)
 {
 	if (entry->text)
-		free(entry->text);
+		gi.TagFree(entry->text);
 
-	entry->text = strdup(text);
+	entry->text = G_CopyString(text);
 	entry->align = align;
 	entry->SelectFunc = SelectFunc;
 }
@@ -133,9 +133,9 @@ void PMenu_Do_Update(edict_t *ent)
 		}
 		sprintf(string + strlen(string), "yv %d ", 32 + i * 8);
 		if (p->align == PMENU_ALIGN_CENTER)
-			x = 162 - (strlen(t) * 4);
+			x = 162 - ((int)strlen(t) * 4);
 		else if (p->align == PMENU_ALIGN_RIGHT)
-			x = 260 - (strlen(t) * 8);
+			x = 260 - ((int)strlen(t) * 8);
 		else
 			x = 58;
 

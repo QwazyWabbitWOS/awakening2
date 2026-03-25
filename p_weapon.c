@@ -2501,6 +2501,9 @@ void Weapon_AGM(edict_t *self)
 	static int	fire_frames[]	= {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 0};
 	static gitem_t *tech = NULL;
 
+	if (!self->client)
+		return;
+
 	if (!self->client->agm_showcharge && ((int)sv_agm_mode->value == 0))
 		self->client->agm_showcharge = true;
 

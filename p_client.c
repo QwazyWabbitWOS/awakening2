@@ -1605,8 +1605,8 @@ void InitClientPersistant(gclient_t *client)
 		if ((int)sv_hook_offhand->value)
 		{
 			item->use = NULL;
-			item->view_model = '\0';
-			item->icon = '\0';
+			item->view_model = "";
+			item->icon = "";
 			client->hookstate = WEAPON_READY;
 		}
 //CW--
@@ -1988,8 +1988,10 @@ void SelectSpawnPoint(edict_t *ent, vec3_t origin, vec3_t angles)
 			{	// there wasn't a spawnpoint without a target, so use any
 				spot = G_Find(spot, FOFS(classname), "info_player_start");
 			}
-			if (!spot)
+			if (!spot) {
 				gi.error("Couldn't find spawn point %s\n", game.spawnpoint);
+				return;
+			}
 		}
 	}
 
@@ -2573,7 +2575,7 @@ qboolean ClientConnect(edict_t *ent, char *userinfo)
 //	Need to store their IP separately, because if the client's userinfo changes later (eg. they 
 //	change their name), then their IP value is blanked.
 
-	strncpy(ent->client->pers.ip, value, sizeof(ent->client->pers.ip));
+	Q_strncpyz(ent->client->pers.ip, sizeof ent->client->pers.ip, value);
 //CW--
 
 //	Check for a password, or a slot reserved password.

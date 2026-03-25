@@ -25,7 +25,7 @@ typedef struct pmenu_s
 
 pmenuhnd_t *PMenu_Open(edict_t *ent, pmenu_t *entries, int cur, int num, void *arg);
 void PMenu_Close(edict_t *ent);
-void PMenu_UpdateEntry(pmenu_t *entry, const char *text, int align, SelectFunc_t SelectFunc);
+void PMenu_UpdateEntry(pmenu_t *entry, char *text, int align, SelectFunc_t SelectFunc);
 void PMenu_Do_Update(edict_t *ent);
 void PMenu_Update(edict_t *ent);
 void PMenu_Next(edict_t *ent);

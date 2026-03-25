@@ -421,6 +421,9 @@ void Fire_Rail(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
 	int			mask;
 	qboolean	water;
 
+	if (!self)
+		return;
+
 	VectorMA(start, 8192.0, aimdir, end);
 	VectorCopy(start, from);
 	ignore = self;
@@ -625,7 +628,7 @@ void C4_Die(edict_t *self)
 
 	if (self == NULL)
 	{
-		gi_centerprintf(self->owner, "BUG: C4_Die() called with null edict.\nPlease contact musashi@planetquake.com\n");
+		gi.dprintf("BUG: C4_Die() called with null edict.\nPlease contact musashi@planetquake.com\n");
 		return;
 	}
 
@@ -893,7 +896,7 @@ void C4_Touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 		self->show_hostile = true;			// abuse flag
 
 		VectorClear(self->s.angles);
-		if (plane->normal)
+		if (!VectorCompare(plane->normal, vec3_origin)) //QW plane->normal is not all zeros
 		{
 			if ((plane->normal[2] > 0.8) || (plane->normal[2] < -0.8))
 				self->s.angles[0] += 90.0;
@@ -1326,7 +1329,7 @@ void Trap_Die(edict_t *self)
 
 	if (self == NULL)
 	{
-		gi_centerprintf(self->owner, "BUG: Trap_Die() called with null edict.\nPlease contact musashi@planetquake.com\n");
+		gi.dprintf("BUG: Trap_Die() called with null edict.\nPlease contact musashi@planetquake.com\n");
 		return;
 	}
 
@@ -1596,7 +1599,7 @@ void Trap_Touch(edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf
 		VectorClear(self->avelocity);
 		self->movetype = MOVETYPE_NONE;
 
-		if (plane->normal)
+		if (!VectorCompare(plane->normal, vec3_origin)) //QW plane->normal is not all zeros
 			vectoangles(plane->normal, self->s.angles);
 		else
 			VectorClear(self->s.angles);
@@ -3094,6 +3097,9 @@ void Fire_Particle(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 	float		scale = 8192.0;
 	int			i;
 
+	if (!self)
+		return;
+
 //	Extend a long line from the muzzle, and clip it against the world cube boundary; this is the
 //	endpoint for the particle beam.
 
@@ -3259,10 +3265,7 @@ void Fire_Instabolt(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	gi.WriteByte(svc_temp_entity);
 	gi.WriteByte(TE_FLECHETTE);
 	gi.WritePosition(tr.endpos);
-	if (!tr.plane.normal)
-		gi.WriteDir(vec3_origin);
-	else
-		gi.WriteDir(tr.plane.normal);
+	gi.WriteDir(tr.plane.normal);
 	gi.multicast(tr.endpos, MULTICAST_PVS);
 
 	if (self->owner && self->owner->client)
@@ -3629,7 +3632,7 @@ void Fire_Chainsaw(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 			gi.WriteByte(svc_temp_entity);
 			gi.WriteByte(TE_SPARKS);
 			gi.WritePosition(tr.endpos);
-			if (!tr.plane.normal)
+			if (VectorCompare(tr.plane.normal, vec3_origin))
 				gi.WriteDir(vec3_origin);
 			else
 				gi.WriteDir(tr.plane.normal);

@@ -432,7 +432,7 @@ void G_FindTrainTeam(void)																			//CW (various bugfixes)
 	edict_t		*e;
 	edict_t		*t;
 	edict_t		*p;
-	char		*targethist[MAX_EDICTS];
+	static char		*targethist[MAX_EDICTS];
 	char		*currtarget;
 	char		*currtargetname;
 	qboolean	findteam = false;
@@ -982,8 +982,8 @@ void CheckCampSite(edict_t *ent, edict_t *other)
 void LoadBotConfig(void)
 {
 	FILE		*filestream;
-	char		name[512];
-	char		skin[512];
+	char		name[512] = { 0 };
+	char		skin[512] = { 0 };
 	int			fnum;
 	int			num_bots = 0;
 	int			combat_skill = 0;
@@ -997,9 +997,6 @@ void LoadBotConfig(void)
 
 	if ((filestream = OpenBotConfigFile(true, true)) != NULL)
 	{
-		memset(&name, 0, sizeof(name));
-		memset(&skin, 0, sizeof(skin));
-
 		while (!finished && ((fnum = fscanf(filestream, "%s %s %d %d %d %d %d %d %d", name, skin, &combat_skill, &accuracy, &aggression, &weapon, &h_view, &v_view, &camper)) != EOF))
 		{
 			if (strlen(name) >= MAX_NAMELEN)
@@ -1015,8 +1012,8 @@ void LoadBotConfig(void)
 			}
 
 			memset(&Bot[num_bots], 0, sizeof(botinfo_t));
-			strncpy(Bot[num_bots].netname, name, MAX_NAMELEN);										//r1,CW
-			strncpy(Bot[num_bots].skin, skin, MAX_SKINLEN);											//r1,CW
+			Q_strncpyz(Bot[num_bots].netname, MAX_NAMELEN, name);										//r1,CW
+			Q_strncpyz(Bot[num_bots].skin, MAX_SKINLEN, skin);											//r1,CW
 
 			//combat skill [0..9]
 			if (combat_skill < 0)
@@ -1116,8 +1113,8 @@ void LoadBotNames(void)
 	for (i = 0; i < MAXBOTS; i++)
 	{
 		memset(&Bot[i], 0, sizeof(botinfo_t));
-		sprintf(Bot[i].netname, "%s", gbot[i][0]);
-		sprintf(Bot[i].skin, "%s", gbot[i][1]);
+		Com_sprintf(Bot[i].netname, sizeof Bot[i].netname, "%s", gbot[i][0]);
+		Com_sprintf(Bot[i].skin, sizeof Bot[i].skin, "%s", gbot[i][1]);
 		RandomizeParameters(i);
 	}
 }
@@ -1302,9 +1299,9 @@ void ReadRouteFile(void)
 
 	game = gi.cvar("game", "", 0);
 	if (!*game->string)
-		sprintf(name, "%s/botroutes/%s.chn", GAMEVERSION, level.mapname);
+		Com_sprintf(name, sizeof name, "%s/botroutes/%s.chn", GAMEVERSION, level.mapname);
 	else
-		sprintf(name, "%s/botroutes/%s.chn", game->string, level.mapname);
+		Com_sprintf(name, sizeof name, "%s/botroutes/%s.chn", game->string, level.mapname);
 //CW--
 
 	TotalRouteNodes = 0;
@@ -1318,10 +1315,17 @@ void ReadRouteFile(void)
 		memset(Route, 0, sizeof(Route));															//CW
 		memset(code, 0, 8);
 
-		fread(code, sizeof(char), 8, fp);
-		fread(&CurrentIndex, sizeof(int), 1, fp);
+		//QW put semicolons on separate lines to appease clang (style)
+		if (fread(code, sizeof(char), 8, fp) != 0) {
+			;
+		}
+		if (fread(&CurrentIndex, sizeof(int), 1, fp) != 0) {
+			;
+		}
 		size = (unsigned int)CurrentIndex * sizeof(route_t);
-		fread(Route, size, 1, fp);
+		if (fread(Route, size, 1, fp) != 0) {
+			;
+		}
 		fclose(fp);
 
 		TotalRouteNodes = CurrentIndex;
@@ -1405,6 +1409,10 @@ void Move_LastRouteIndex(void)
 			break;
 	}
 
+	// limit index range
+	if (i < 0 || i >= MAXNODES)
+		return;
+
 	if (!CurrentIndex || !Route[i].index)
 		CurrentIndex = i;
 	else
@@ -1434,7 +1442,7 @@ char *Random_IP(void)
 		ip1 = 128 + (rand() % 128);
 	} while ((ip1 == 192) || (ip1 == 172));
 
-	sprintf(ipstr, "%d.%d.%d.%d", ip1, (int)(rand()%256), (int)(rand()%256), (int)(rand()%256));
+	Com_sprintf(ipstr, sizeof ipstr, "%d.%d.%d.%d", ip1, (int)(rand()%256), (int)(rand()%256), (int)(rand()%256));
 
 	return ipstr;
 }
@@ -1546,7 +1554,7 @@ qboolean SpawnBot(int botindex)																		//CW...
 		ent->client->resp.ready = true;
 //CW--
 
-	sprintf(userinfo,"\\name\\%s\\skin\\%s\\fov\\90\\hand\\2\\ip\\%s\\ping\\%3d", Bot[botindex].netname, Bot[botindex].skin, Random_IP(), (int)(100+(rand()%128)));	// Maj++ - We store ping in userinfo string. hehe
+	Com_sprintf(userinfo, sizeof userinfo, "\\name\\%s\\skin\\%s\\fov\\90\\hand\\2\\ip\\%s\\ping\\%3d", Bot[botindex].netname, Bot[botindex].skin, Random_IP(), (int)(100+(rand()%128)));	// Maj++ - We store ping in userinfo string. hehe
 	ClientUserinfoChanged(ent, userinfo);															//CW++
 
 	PutClientInServer(ent);
@@ -3584,7 +3592,7 @@ FIRED:	// shoot the weapon
 	{
 		if (9 * random() > Bot[ent->client->pers.botindex].skill[AGGRESSION])
 		{
-			if ((my_weapon > WEAP_CHAINSAW) && (my_weapon != WEAP_GRAPPLE) && target->client && (target->client->current_enemy != ent))	//CW
+			if (target && target->client && (my_weapon > WEAP_CHAINSAW) && (my_weapon != WEAP_GRAPPLE) && (target->client->current_enemy != ent))	//CW
 			{
 				f = target->s.angles[YAW] - ent->s.angles[YAW];
 				if (f > 180)
@@ -4027,7 +4035,7 @@ int Bot_TestMove(edict_t *ent, float ryaw, vec3_t pos, float dist, float *bottom
 	else
 	{
 		VectorCopy(trstart, pos);
-		VectorCopy(trstart, trend);
+		VectorCopy(trstart, trend); 
 		trstart[2] = trend[2] - 8190;
 		tr = gi.trace(trend, trmin, trmax, trstart, ent, MASK_BOTSOLIDX|MASK_OPAQUE);
 		*bottom = tr.endpos[2] - ent->s.origin[2];
@@ -4072,7 +4080,6 @@ qboolean Bot_Watermove(edict_t *ent, vec3_t pos, float dist, float upd)
 	vec3_t	trmin;
 	vec3_t	trmax;
 	vec3_t	touchmin;
-	float	max;
 	float	vec;
 	float	i;
 	float	j;
@@ -4089,7 +4096,6 @@ qboolean Bot_Watermove(edict_t *ent, vec3_t pos, float dist, float upd)
 	VectorCopy(ent->s.origin, trmin);
 	trmin[2] += upd;
 	vec = -1;
-	max = 0;
 
 	for (i = 0; i < 360; i += 10)
 	{
@@ -4582,7 +4588,7 @@ void Bot_AI(edict_t *ent)
 	int			j = 0;																				//CW
 	int			k;	
 	qboolean	ladderdrop;
-	qboolean	canrocj;
+	//qboolean	canrocj;
 	qboolean	waterjumped;
 
 	myrandom = random();
@@ -4777,7 +4783,7 @@ void Bot_AI(edict_t *ent)
 
 //	Bot can rocket jump?
 
-	canrocj = (ent->client->pers.inventory[ITEM_INDEX(item_rocketlauncher)] && (ent->client->pers.inventory[ITEM_INDEX(item_rockets)] > 0));
+	//canrocj = (ent->client->pers.inventory[ITEM_INDEX(item_rocketlauncher)] && (ent->client->pers.inventory[ITEM_INDEX(item_rockets)] > 0));
 
 //	Ducking check.
 
@@ -6866,7 +6872,7 @@ VCHCANSEL:
 
 		tr = gi.trace(ent->s.origin, trmin, ent->maxs, touchmax, ent, MASK_BOTSOLID);
 		front = tr.ent;
-		if (tr.contents & CONTENTS_LADDER)
+		if (front && tr.contents & CONTENTS_LADDER)
 			tempflag = 1;
 
 		// upper

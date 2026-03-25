@@ -232,9 +232,11 @@ edict_t *G_FindNextCamera(edict_t *camera, edict_t *monitor)
 			next = camera;
 			next++;
 		}
-		else
+		else if (g_edicts != NULL)
 			next = g_edicts;
-		
+		else
+			return NULL;
+
 		for ( ; next < &g_edicts[globals.num_edicts] ; next++)
 		{
 			if (next == camera)
@@ -360,29 +362,32 @@ edict_t *G_FindPrevCamera(edict_t *camera, edict_t *monitor)
 	if (!prev->count)
 	{
 		newcamera = NULL;
-		for (prev = g_edicts ; prev < &g_edicts[globals.num_edicts] ; prev++)
+		if (g_edicts != NULL)
 		{
-			if (prev == camera)
+			for (prev = g_edicts; prev < &g_edicts[globals.num_edicts]; prev++)
 			{
-				if (newcamera)
-					goto found_one;
+				if (prev == camera)
+				{
+					if (newcamera)
+						goto found_one;
 
-				continue;
+					continue;
+				}
+				if (!prev->inuse)
+					continue;
+				if (prev->deadflag == DEAD_DEAD)
+					continue;
+				if (!prev->targetname)
+					continue;
+				// don't select "inactive" cameras
+				if (!Q_stricmp(prev->classname, "turret_breach") && (prev->spawnflags & 16))
+					continue;
+
+				if (!Q_stricmp(prev->targetname, monitor->target))
+					newcamera = prev;
 			}
-			if (!prev->inuse)
-				continue;
-			if (prev->deadflag == DEAD_DEAD)
-				continue;
-			if (!prev->targetname)
-				continue;
-			// don't select "inactive" cameras
-			if (!Q_stricmp(prev->classname, "turret_breach") && (prev->spawnflags & 16))
-				continue;
-
-			if (!Q_stricmp(prev->targetname, monitor->target))
-				newcamera = prev;
+			goto found_one;
 		}
-		goto found_one;
 	}
 	else
 	{
@@ -442,7 +447,7 @@ edict_t *G_FindPrevCamera(edict_t *camera, edict_t *monitor)
 	}
 
 found_one:
-	if (!(monitor->spawnflags & 32) && (newcamera->svflags & SVF_MONSTER))
+	if (newcamera && !(monitor->spawnflags & 32) && (newcamera->svflags & SVF_MONSTER))
 		newcamera->svflags |= SVF_NOCLIENT;
 
 	return newcamera;

@@ -152,7 +152,7 @@ void InitGame(void)
 	int		i;
 //CW--
 
-	gi.dprintf("====== Init Game ======\n\n");
+	gi.dprintf("====== Init Game Awakening II v%s %s ======\n\n", AWK_STRING_VERSION, BUILD);
 
 //CW++
 	gi.dprintf("***********************\n");
@@ -729,7 +729,7 @@ void WriteField1(FILE *f, field_t *field, byte *base)
 		case F_LSTRING:
 		case F_GSTRING:
 			if (*(char **)p)
-				len = strlen(*(char **)p) + 1;
+				len = (int)strlen(*(char **)p) + 1;
 			else
 				len = 0;
 			*(int *)p = len;
@@ -776,7 +776,7 @@ void WriteField2(FILE *f, field_t *field, byte *base)
 		case F_GSTRING:
 			if (*(char **)p)
 			{
-				len = strlen(*(char **)p) + 1;
+				len = (int)strlen(*(char **)p) + 1;
 				fwrite (*(char **)p, len, 1, f);
 			}
 			break;
@@ -803,6 +803,7 @@ void ReadField(FILE *f, field_t *field, byte *base)
 	void	*p;
 	int		len;
 	int		index;
+	size_t	count;
 
 	p = (void *)(base + field->ofs);
 	switch (field->type)
@@ -821,7 +822,10 @@ void ReadField(FILE *f, field_t *field, byte *base)
 			else
 			{
 				*(char **)p = gi.TagMalloc (len, TAG_LEVEL);
-				fread (*(char **)p, len, 1, f);
+				count = fread(*(char**)p, len, 1, f);
+				if (count) {
+					; // don't worry, be happy
+				}
 			}
 			break;
 
@@ -832,7 +836,10 @@ void ReadField(FILE *f, field_t *field, byte *base)
 			else
 			{
 				*(char **)p = gi.TagMalloc (len, TAG_GAME);
-				fread (*(char **)p, len, 1, f);
+				count = fread(*(char**)p, len, 1, f);
+				if (count) {
+					; // don't worry, be happy
+				}
 			}
 			break;
 
@@ -904,8 +911,12 @@ All pointer variables (except function pointers) must be handled specially.
 void ReadClient(FILE *f, gclient_t *client)
 {
 	field_t	*field;
+	size_t	count;
 
-	fread(client, sizeof(*client), 1, f);
+	count = fread(client, sizeof(*client), 1, f);
+	if (count) {
+		; // don't worry, be happy
+	}
 
 	for (field = clientfields; field->name; ++field)
 		ReadField(f, field, (byte *)client);
@@ -935,8 +946,10 @@ void WriteGame(char *filename, qboolean autosave)
 		SaveClientData();
 
 	f = fopen(filename, "wb");
-	if (!f)
+	if (!f) {
 		gi.error("Couldn't open %s", filename);
+		return;
+	}
 
 	memset(str, 0, sizeof(str));
 	strcpy(str, __DATE__);
@@ -956,15 +969,22 @@ void ReadGame(char *filename)
 {
 	FILE	*f;
 	int		i;
-	char	str[16];
+	char	str[16] = { 0 };
+	size_t	count;
 
 	gi.FreeTags(TAG_GAME);
 
 	f = fopen(filename, "rb");
-	if (!f)
+	if (!f) {
 		gi.error("Couldn't open %s", filename);
+		return;
+	}
 
-	fread(str, sizeof(str), 1, f);
+	count = fread(str, sizeof(str), 1, f);
+	if (count) {
+		; // don't worry, be happy
+	}
+
 	if (strcmp(str, __DATE__))
 	{
 		fclose(f);
@@ -974,7 +994,7 @@ void ReadGame(char *filename)
 	g_edicts =  gi.TagMalloc(game.maxentities * sizeof(g_edicts[0]), TAG_GAME);
 	globals.edicts = g_edicts;
 
-	fread(&game, sizeof(game), 1, f);
+	count = fread(&game, sizeof(game), 1, f);
 	game.clients = gi.TagMalloc(game.maxclients * sizeof(game.clients[0]), TAG_GAME);
 	for (i = 0; i < game.maxclients; i++)
 		ReadClient(f, &game.clients[i]);
@@ -1050,8 +1070,12 @@ All pointer variables (except function pointers) must be handled specially.
 void ReadEdict(FILE *f, edict_t *ent)
 {
 	field_t *field;
+	size_t	count;
 
-	fread(ent, sizeof(*ent), 1, f);
+	count = fread(ent, sizeof(*ent), 1, f);
+	if (count) {
+		; // don't worry, be happy
+	}
 
 	for (field = savefields; field->name; field++)
 		ReadField(f, field, (byte *)ent);
@@ -1067,9 +1091,12 @@ All pointer variables (except function pointers) must be handled specially.
 void ReadLevelLocals(FILE *f)
 {
 	field_t *field;
+	size_t	count;
 
-	fread(&level, sizeof(level), 1, f);
-
+	count = fread(&level, sizeof(level), 1, f);
+	if (count) {
+		; // don't worry, be happy
+	}
 	for (field = levelfields; field->name; field++)
 		ReadField(f, field, (byte *)&level);
 }
@@ -1082,20 +1109,22 @@ WriteLevel
 void WriteLevel(char *filename)
 {
 	edict_t	*ent;
-	void	*base;
+	void	(*base)(void);
 	FILE	*f;
 	int		i;
 
 	f = fopen(filename, "wb");
-	if (!f)
+	if (!f) {
 		gi.error("Couldn't open %s", filename);
+		return;
+	}
 
 	// write out edict size for checking
 	i = sizeof(edict_t);
 	fwrite(&i, sizeof(i), 1, f);
 
 	// write out a function pointer for checking
-	base = (void *)InitGame;
+	base = &InitGame;
 	fwrite(&base, sizeof(base), 1, f);
 
 	// write out level_locals_t
@@ -1137,14 +1166,18 @@ No clients are connected yet.
 void ReadLevel(char *filename)
 {
 	edict_t	*ent;
-	void	*base;
+	void	(*base)(void);
 	FILE	*f;
 	int		entnum;
 	int		i;
+	size_t	count;
+
 
 	f = fopen(filename, "rb");
-	if (!f)
+	if (!f) {
 		gi.error("Couldn't open %s", filename);
+		return;
+	}
 
 	// free any dynamic memory allocated by loading the level
 	// base state
@@ -1155,7 +1188,7 @@ void ReadLevel(char *filename)
 	globals.num_edicts = (int)maxclients->value + 1;
 
 	// check edict size
-	fread(&i, sizeof(i), 1, f);
+	count = fread(&i, sizeof(i), 1, f);
 	if (i != sizeof(edict_t))
 	{
 		fclose(f);
@@ -1163,8 +1196,8 @@ void ReadLevel(char *filename)
 	}
 
 	// check function pointer base address
-	fread(&base, sizeof(base), 1, f);
-	if (base != (void *)InitGame)
+	count = fread(&base, sizeof(base), 1, f);
+	if (base != InitGame)
 	{
 		fclose(f);
 		gi.error("ReadLevel: function pointers have moved");
@@ -1176,7 +1209,8 @@ void ReadLevel(char *filename)
 	// load all the entities
 	while (1)
 	{
-		if (fread(&entnum, sizeof(entnum), 1, f) != 1)
+		count = fread(&entnum, sizeof(entnum), 1, f);
+		if (count != 1)
 		{
 			fclose(f);
 			gi.error("ReadLevel: failed to read entnum");

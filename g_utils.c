@@ -489,7 +489,7 @@ char *G_CopyString(char *in)
 {
 	char *out;
 	
-	out = gi.TagMalloc(strlen(in)+1, TAG_LEVEL);
+	out = gi.TagMalloc((int)strlen(in)+1, TAG_LEVEL);
 	strcpy(out, in);
 	return out;
 }
@@ -639,7 +639,8 @@ void G_TouchTriggers(edict_t *ent)
 
 //CW++
 		if (ent->isabot && (hit->touch == trigger_push_touch))
-			ent->client->movestate |= STS_TRIGPUSH;
+			if (ent->client)
+				ent->client->movestate |= STS_TRIGPUSH;
 //CW--
 		hit->touch(hit, ent, NULL, NULL);
 	}
@@ -877,23 +878,25 @@ void TList_AddNode(edict_t *ent)
 		return;
 	}
 
-	if (ent->owner->next_node && (ent->owner->next_node->die != C4_DieFromDamage) && (ent->owner->next_node->die != Trap_DieFromDamage))
+	if (ent->owner->next_node && 
+		(ent->owner->next_node->die != C4_DieFromDamage) && 
+		(ent->owner->next_node->die != Trap_DieFromDamage))
 	{
 		gi.dprintf("BUG: Invalid pointer passed to TList_AddNode().\nPlease contact musashi@planetquake.com\n");
 		return;
 	}
 
-//	If the player currently has their maximum number of C4/Traps active, pop the oldest (first) one.
+	//	If the player currently has their maximum number of C4/Traps active, pop the oldest (first) one.
 
 	if (ent->owner->client->resp.nodes_active >= (int)sv_traps_max_active->value)
 	{
-		if (ent->owner->next_node->die == C4_DieFromDamage)
+		if (ent->owner->next_node && ent->owner->next_node->die == C4_DieFromDamage)
 			C4_Die(ent->owner->next_node);
-		else
-			Trap_Die(ent->owner->next_node);			
+		else if (ent->owner->next_node && ent->owner->next_node->die == Trap_DieFromDamage)
+			Trap_Die(ent->owner->next_node);
 	}
 
-//	Add the new node to the end of the list.
+	//	Add the new node to the end of the list.
 	
 	if (ent->owner->next_node)
 	{
@@ -1450,7 +1453,7 @@ qboolean InPak(char *basedir, char *gamedir, char *filename)
 
 		if (NULL != (f = fopen(pakfile, "rb")))
 		{
-			num = fread(&pakheader, 1, sizeof(pak_header_t), f);
+			num = (int)fread(&pakheader, 1, sizeof(pak_header_t), f);
 			if (num >= sizeof(pak_header_t))
 			{
 				if ((pakheader.id[0] == 'P') && (pakheader.id[1] == 'A') && (pakheader.id[2] == 'C') && (pakheader.id[3] == 'K'))
@@ -1459,7 +1462,7 @@ qboolean InPak(char *basedir, char *gamedir, char *filename)
 					fseek(f, pakheader.dstart, SEEK_SET);
 					for (kk = 0; (kk < numitems) && !found; kk++)
 					{
-						fread(&pakitem, 1, sizeof(pak_item_t), f);
+						num = (int)fread(&pakitem, 1, sizeof(pak_item_t), f);
 						if (!Q_stricmp(pakitem.name, filename))
 							found = true;
 					}
@@ -1521,7 +1524,7 @@ qboolean FileExists(char *checkname, filetype_t ftype)
 
 //		Search in the game directory for external file.
 
-		sprintf(filename, "%s/%s/%s", basedir->string, gamedir->string, path);
+		Com_sprintf(filename, sizeof filename, "%s/%s/%s", basedir->string, gamedir->string, path);
 		if ((fstream = fopen(filename, "r")) != NULL)
 		{
 			fclose(fstream);
@@ -1536,7 +1539,7 @@ qboolean FileExists(char *checkname, filetype_t ftype)
 	
 //	Search in the 'baseq2' directory for external file.
 
-	sprintf(filename, "%s/baseq2/%s", basedir->string, path);
+	Com_sprintf(filename, sizeof filename, "%s/baseq2/%s", basedir->string, path);
 	if ((fstream = fopen(filename, "r")) != NULL)
 	{
 		fclose(fstream);
@@ -1556,7 +1559,7 @@ qboolean FileExists(char *checkname, filetype_t ftype)
 void gi_cprintf(edict_t *ent, int printlevel, char *fmt, ...)
 {
 	va_list	argptr;
-	char	bigbuffer[0x10000];
+	static char	bigbuffer[0x10000];
 	int		len;
 
 	if (!ent || !ent->inuse || !ent->client)
@@ -1588,7 +1591,7 @@ void gi_cprintf(edict_t *ent, int printlevel, char *fmt, ...)
 void gi_centerprintf(edict_t *ent, char *fmt, ...)
 {
 	va_list	argptr;
-	char	bigbuffer[0x10000];
+	static char	bigbuffer[0x10000];
 	int		len;
 
 	if (!ent || !ent->inuse || !ent->client)
@@ -1621,7 +1624,7 @@ void gi_bprintf(int printlevel, char *fmt, ...)
 {
 	edict_t	*ent;
 	va_list	argptr;
-	char	bigbuffer[0x10000];
+	static char	bigbuffer[0x10000];
 	int		len;
 	int		i;
 

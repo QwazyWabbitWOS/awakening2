@@ -748,7 +748,7 @@ void Cmd_Vote_Map(edict_t *ent, char *bspname)
 					if ((filename[0] == '/') && (filename[1] == '/'))
 						continue;
 
-					maplist[nmaps] = strdup(filename);
+					maplist[nmaps] = G_CopyString(filename);
 					if (++nmaps == MAX_MAPS)
 						finished = true;
 				}
@@ -775,7 +775,7 @@ void Cmd_Vote_Map(edict_t *ent, char *bspname)
 		}
 
 		for (i = 0; i < nmaps; ++i)
-			free(maplist[i]);
+			gi.TagFree(maplist[i]);
 
 		if (!found)
 		{
@@ -1446,7 +1446,10 @@ void Cmd_AGMFling_f(edict_t *ent)
 	edict_t	*targ;
 	vec3_t	forward;
 
-//	Sanity check.
+	if (ent->client == NULL)
+		return;
+
+	//	Sanity check.
 
 	if (ent->client->agm_target == NULL)
 	{
@@ -1483,7 +1486,7 @@ void Cmd_AGMFling_f(edict_t *ent)
 	if (!tech)
 		tech = FindItemByClassname("item_tech2");
 
-	if (tech && ent->client && ent->client->pers.inventory[ITEM_INDEX(tech)])
+	if (tech && ent->client->pers.inventory[ITEM_INDEX(tech)])
 	{
 		if (ent->client->ctf_techsndtime < level.time)
 		{
@@ -2879,6 +2882,8 @@ qboolean CheckFlood(edict_t *ent)
 {
 	gclient_t *cl;
 	int		i;
+	const int FLOOD_WHEN_SIZE = sizeof cl->flood_when / sizeof(float);
+	//QW the size of the 'flood_when' array
 
 	if (flood_msgs->value)
 	{
@@ -2890,16 +2895,18 @@ qboolean CheckFlood(edict_t *ent)
             return true;
         }
 
-        i = cl->flood_whenhead - flood_msgs->value + 1;
+        i = cl->flood_whenhead - (int)flood_msgs->value + 1;
         if (i < 0)
-            i = (sizeof(cl->flood_when) / sizeof(cl->flood_when[0])) + i;
-		if (cl->flood_when[i] && (level.time - cl->flood_when[i] < flood_persecond->value))
+            i = FLOOD_WHEN_SIZE + i;
+
+		// Fix: Ensure 'i' is within bounds before accessing cl->flood_when[i]
+		if (i >= 0 && i < FLOOD_WHEN_SIZE && cl->flood_when[i] && (level.time - cl->flood_when[i] < flood_persecond->value))
 		{
 			cl->flood_locktill = level.time + flood_waitdelay->value;
 			gi_cprintf(ent, PRINT_CHAT, "Flood protection:  You can't talk for %d seconds.\n", (int)flood_waitdelay->value);
             return true;
         }
-		cl->flood_whenhead = (cl->flood_whenhead + 1) %	(sizeof(cl->flood_when) / sizeof(cl->flood_when[0]));
+		cl->flood_whenhead = (cl->flood_whenhead + 1) % FLOOD_WHEN_SIZE;
 		cl->flood_when[cl->flood_whenhead] = level.time;
 	}
 	return false;

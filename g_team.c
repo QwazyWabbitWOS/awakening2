@@ -411,12 +411,12 @@ void CTFAssignSkin(edict_t *ent, char *s)
 
 	if (strlen(sv_team1_model->string) && (ent->client->resp.ctf_team == CTF_TEAM1))
 	{
-		strncpy(t, sv_team1_model->string, sizeof(t)-2);
+		Q_strncpyz(t, sizeof(t) - 2, sv_team1_model->string);
 		strcat(t, "/");
 	}
 	else if (strlen(sv_team2_model->string) && (ent->client->resp.ctf_team == CTF_TEAM2))
 	{
-		strncpy(t, sv_team2_model->string, sizeof(t)-2);
+		Q_strncpyz(t, sizeof(t) - 2, sv_team2_model->string);
 		strcat(t, "/");
 	}
 	else
@@ -2124,7 +2124,7 @@ void CTFScoreboardMessage(edict_t *ent, edict_t *killer)
 					"xv 256 yv 12 num 2 20 ",
 					totalscore[0], total[0],
 					totalscore[1], total[1]);
-	len = strlen(string);
+	len = (int)strlen(string);
 
 	for (i = 0; i < 16 ; i++)
 	{
@@ -2152,7 +2152,7 @@ void CTFScoreboardMessage(edict_t *ent, edict_t *killer)
 			if (maxsize - len > strlen(entry))
 			{
 				strcat(string, entry);
-				len = strlen(string);
+				len = (int)strlen(string);
 				last[0] = i;
 			}
 		}
@@ -2178,7 +2178,7 @@ void CTFScoreboardMessage(edict_t *ent, edict_t *killer)
 			if (maxsize - len > strlen(entry))
 			{
 				strcat(string, entry);
-				len = strlen(string);
+				len = (int)strlen(string);
 				last[1] = i;
 			}
 		}
@@ -2207,7 +2207,7 @@ void CTFScoreboardMessage(edict_t *ent, edict_t *killer)
 				k = 1;
 				sprintf(entry, "xv 0 yv %d string2 \"Spectators\" ", j);
 				strcat(string, entry);
-				len = strlen(string);
+				len = (int)strlen(string);
 				j += 8;
 			}
 
@@ -2221,7 +2221,7 @@ void CTFScoreboardMessage(edict_t *ent, edict_t *killer)
 			if (maxsize - len > strlen(entry))
 			{
 				strcat(string, entry);
-				len = strlen(string);
+				len = (int)strlen(string);
 			}
 			
 			if (n & 1)
@@ -3683,7 +3683,7 @@ pmenu_t joinmenu_ffa[] = {
 	{ "v" AWK_STRING_VERSION,		PMENU_ALIGN_RIGHT, NULL }
 };
 
-static const int ncmenu_game = 1;
+//static const int ncmenu_game = 1;
 //CW--
 
 pmenu_t nochasemenu[] = {
@@ -3798,18 +3798,18 @@ int CTFUpdateJoinMenu(edict_t *ent)
 		{
 //CW++
 			sprintf(msgbuf, "Join %s MATCH Team", sv_team1_name->string);
-			joinmenu[jmenu_red].text = strdup(msgbuf);
+			joinmenu[jmenu_red].text = G_CopyString(msgbuf);
 			sprintf(msgbuf, "Join %s MATCH Team", sv_team2_name->string);
-			joinmenu[jmenu_blue].text = strdup(msgbuf);
+			joinmenu[jmenu_blue].text = G_CopyString(msgbuf);
 //CW--
 		}
 		else
 		{
 //CW++
 			sprintf(msgbuf, "Join %s Team", sv_team1_name->string);
-			joinmenu[jmenu_red].text = strdup(msgbuf);
+			joinmenu[jmenu_red].text = G_CopyString(msgbuf);
 			sprintf(msgbuf, "Join %s Team", sv_team2_name->string);
-			joinmenu[jmenu_blue].text = strdup(msgbuf);
+			joinmenu[jmenu_blue].text = G_CopyString(msgbuf);
 //CW--
 		}
 
@@ -4912,7 +4912,7 @@ void TDMScoreboardMessage(edict_t *ent, edict_t *killer)
 					"xv 200 yv 28 string \"%4d/%-3d\" ",
 					totalscore[0], total[0],
 					totalscore[1], total[1]);
-	len = strlen(string);
+	len = (int)strlen(string);
 
 	for (i = 0; i < 16; ++i)
 	{
@@ -4937,7 +4937,7 @@ void TDMScoreboardMessage(edict_t *ent, edict_t *killer)
 			if (maxsize - len > strlen(entry))
 			{
 				strcat(string, entry);
-				len = strlen(string);
+				len = (int)strlen(string);
 				last[0] = i;
 			}
 		}
@@ -4958,7 +4958,7 @@ void TDMScoreboardMessage(edict_t *ent, edict_t *killer)
 			if (maxsize - len > strlen(entry))
 			{
 				strcat(string, entry);
-				len = strlen(string);
+				len = (int)strlen(string);
 				last[1] = i;
 			}
 		}
@@ -4987,7 +4987,7 @@ void TDMScoreboardMessage(edict_t *ent, edict_t *killer)
 				k = 1;
 				sprintf(entry, "xv 0 yv %d string2 \"Spectators\" ", j);
 				strcat(string, entry);
-				len = strlen(string);
+				len = (int)strlen(string);
 				j += 8;
 			}
 
@@ -5001,7 +5001,7 @@ void TDMScoreboardMessage(edict_t *ent, edict_t *killer)
 			if (maxsize - len > strlen(entry))
 			{
 				strcat(string, entry);
-				len = strlen(string);
+				len = (int)strlen(string);
 			}
 			
 			if (n & 1)
@@ -5208,10 +5208,10 @@ void ASLTSpawn(void)
 		return;
 
 	if (world->message2)
-		asltgame.msg_attack = strdup(world->message2);
+		asltgame.msg_attack = G_CopyString(world->message2);
 
 	if (world->message3)
-		asltgame.msg_defend = strdup(world->message3);
+		asltgame.msg_defend = G_CopyString(world->message3);
 }
 
 qboolean ASLTCheckRules(void)
@@ -5535,7 +5535,7 @@ void ASLTMissionUpdate(edict_t *ent, pmenuhnd_t *display)
 	mission_info_t	*mission = display->arg;
 	edict_t			*e = NULL;
 	char			title[32];
-	char			text[LINESIZE + 1];
+	char			text[LINESIZE + 1] = { 0 };
 	char			*buffer = "";
 	char			*c = "";
 	int				itext = 0;
@@ -5590,11 +5590,11 @@ void ASLTMissionUpdate(edict_t *ent, pmenuhnd_t *display)
 	while (!finished)
 	{
 		if (n_msg == 1)
-			buffer = strdup(e->message);
+			buffer = G_CopyString(e->message);
 		else if (n_msg == 2)
-			buffer = strdup(e->message2);
+			buffer = G_CopyString(e->message2);
 		else if (n_msg == 3)
-			buffer = strdup(e->message3);
+			buffer = G_CopyString(e->message3);
 
 		c = buffer;
 		while (*c != 0)
@@ -5668,7 +5668,7 @@ void ASLTMissionUpdate(edict_t *ent, pmenuhnd_t *display)
 		PMenu_UpdateEntry(display->entries + line, text, PMENU_ALIGN_LEFT, NULL);
 	}
 
-	free(buffer);
+	gi.TagFree(buffer);
 
 //	Set the "next objective" menu command if there is a target [info_mission] to follow.
 

@@ -87,7 +87,7 @@ void SP_misc_easterchick2(edict_t *self);
 
 void SP_turret_breach(edict_t *self);
 void SP_turret_base(edict_t *self);
-void SP_turret_driver(edict_t *self);
+//void SP_turret_driver(edict_t *self);
 
 //CW++
 void SP_weapon_shotgun(edict_t *self);
@@ -373,15 +373,15 @@ char *ED_NewString(char *string)
 	char	*newb;
 	char	*new_p;
 	int		i;
-	int		l;
+	int		len;
 	
-	l = strlen(string) + 1;
-	newb = gi.TagMalloc(l, TAG_LEVEL);
+	len = (int)strlen(string) + 1;
+	newb = gi.TagMalloc(len, TAG_LEVEL);
 	new_p = newb;
 
-	for (i = 0; i < l; i++)
+	for (i = 0; i < len; i++)
 	{
-		if ((string[i] == '\\') && (i < l-1))
+		if ((string[i] == '\\') && (i < len-1))
 		{
 			i++;
 			if (string[i] == 'n')
@@ -409,7 +409,7 @@ void ED_ParseField(char *key, char *value, edict_t *ent)
 {
 	field_t	*f;
 	byte	*b;
-	vec3_t	vec;
+	vec3_t	vec = { 0 };
 	float	v;
 
 	for (f = fields; f->name; ++f)
@@ -428,7 +428,9 @@ void ED_ParseField(char *key, char *value, edict_t *ent)
 					break;
 
 				case F_VECTOR:
-					sscanf (value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
+					if (sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]) != 3) {
+						gi.dprintf("WARNING: Vector field incomplete in %s, map: %s, field: %s\n", __func__, level.mapname, f->name);
+					}
 					((float *)(b+f->ofs))[0] = vec[0];
 					((float *)(b+f->ofs))[1] = vec[1];
 					((float *)(b+f->ofs))[2] = vec[2];
@@ -877,16 +879,16 @@ void SP_worldspawn(edict_t *ent)
 	SetItemNames();
 
 	if (st.nextmap)
-		strcpy(level.nextmap, st.nextmap);
+		Q_strncpyz(level.nextmap, sizeof level.nextmap, st.nextmap);
 
 	// make some data visible to the server
 	if (ent->message && ent->message[0])
 	{
 		gi.configstring(CS_NAME, ent->message);
-		strncpy(level.level_name, ent->message, sizeof(level.level_name));
+		Q_strncpyz(level.level_name, sizeof(level.level_name), ent->message);
 	}
 	else
-		strncpy(level.level_name, level.mapname, sizeof(level.level_name));
+		Q_strncpyz(level.level_name, sizeof(level.level_name), level.mapname);
 
 	if (st.sky && st.sky[0])
 		gi.configstring(CS_SKY, st.sky);

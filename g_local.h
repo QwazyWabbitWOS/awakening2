@@ -1,4 +1,5 @@
 // g_local.h -- local definitions for game module
+#pragma once
 
 #include "q_shared.h"
 
@@ -9,6 +10,11 @@
 #include "p_menu.h"																					//ZOID++
 #include "g_chase.h"																				//CW++
 
+#ifndef _DEBUG
+#define BUILD	"Release"
+#else
+#define BUILD	"Debug"
+#endif
 
 // The "gameversion" client command will print this plus the compile date.
 #define	GAMEVERSION	"awaken2"																		//CW
@@ -796,10 +802,12 @@ extern	int	body_armor_index;
 
 extern	int	meansOfDeath;
 
-#define	FOFS(x) (int)&(((edict_t *)0)->x)
-#define	STOFS(x) (int)&(((spawn_temp_t *)0)->x)
-#define	LLOFS(x) (int)&(((level_locals_t *)0)->x)
-#define	CLOFS(x) (int)&(((gclient_t *)0)->x)
+#define q_offsetof(t, m)	((size_t)&((t *)0)->m)
+
+#define FOFS(x)		q_offsetof(edict_t, x)
+#define STOFS(x)	q_offsetof(spawn_temp_t, x)
+#define	LLOFS(x)	q_offsetof(level_locals_t, x)
+#define	CLOFS(x)	q_offsetof(gclient_t, x)
 
 #define random()	((rand () & 0x7fff) / ((float)0x7fff))
 #define crandom()	(2.0 * (random() - 0.5))
@@ -1443,7 +1451,7 @@ void rotating_blocked(edict_t *self, edict_t *other);
 void SetupAGMSpawn(void);
 void SetupDiscLauncherSpawn(void);
 void SetupRndPowerupSpawn(void);
-void RemoveDisabledWeapons(void);
+//void RemoveDisabledWeapons(void);
 void RemoveDisabledPowerups(void);
 //CW--
 

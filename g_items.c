@@ -109,6 +109,9 @@ gitem_t	*FindItem(char *pickup_name)
 
 void DoRespawn(edict_t *ent)
 {
+	if (!ent)
+		return;
+
 	if (ent->team)
 	{
 		edict_t	*master;
@@ -117,34 +120,41 @@ void DoRespawn(edict_t *ent)
 
 		master = ent->teammaster;
 
-//ZOID++
-//		In CTF, when weapons-stay is on, only the master of a team of weapons is spawned.
-
+		//ZOID
+		//in ctf, when we are weapons stay, only the master of a team of weapons
+		//is spawned
 		if (((int)sv_gametype->value > G_FFA) && ((int)dmflags->value & DF_WEAPONS_STAY) && master->item && (master->item->flags & IT_WEAPON)) //CW
+		{
 			ent = master;
+		}
 		else
 		{
-//ZOID--
-			for (count = 0, ent = master; ent; ent = ent->chain, count++)
-				;
+			count = 0;
+			for (ent = master; ent; ent = ent->chain)
+				count++;
 
-			choice = rand() % count;
-			for (count = 0, ent = master; count < choice; ent = ent->chain, count++)
-				;
+			choice = count ? rand() % count : 0;
+
+			count = 0;
+			for (ent = master; count < choice; ent = ent->chain)
+				count++;
 		}
 	}
 
-	ent->svflags &= ~SVF_NOCLIENT;
-	ent->solid = SOLID_TRIGGER;
-	gi.linkentity(ent);
+	if (ent)
+	{
+		ent->svflags &= ~SVF_NOCLIENT;
+		ent->solid = SOLID_TRIGGER;
+		gi.linkentity(ent);
 
-//Maj++
-	if (ent->classname[0] == 'R')
-		return;
-//Maj--
+		//Maj++
+		if (ent->classname[0] == 'R')
+			return;
+		//Maj--
 
-	// send an effect
-	ent->s.event = EV_ITEM_RESPAWN;
+		// send an effect
+		ent->s.event = EV_ITEM_RESPAWN;
+	}
 }
 
 void SetRespawn(edict_t *ent, float delay)
@@ -1595,8 +1605,10 @@ void PrecacheItem(gitem_t *it)
 			s++;
 
 		len = s - start;
-		if ((len >= MAX_QPATH) || (len < 5))
+		if ((len >= MAX_QPATH) || (len < 5)) {
 			gi.error("PrecacheItem: %s has bad precache string", it->classname);
+			return;
+		}
 
 		memcpy(data, start, len);
 		data[len] = 0;
@@ -1613,7 +1625,7 @@ void PrecacheItem(gitem_t *it)
 		if (!strcmp(data+len-3, "pcx"))
 //CW++
 		{	//imageindex doesn't use the '.pcx' extension
-			strncpy(pcxdata, data, len-4);
+			Q_strncpyz(pcxdata, sizeof pcxdata, data);
 			memcpy(pcxdata+len-4, "\0", sizeof("\0"));
 			gi.imageindex(pcxdata);
 		}

@@ -13,7 +13,7 @@ ARCH := $(shell uname -m | sed -e s/i.86/i386/ \
 	-e s/sa110/arm/ -e s/alpha/axp/)
 # On 64-bit OS use the command: setarch i386 make all
 # to obtain the 32-bit binary DLL on 64-bit Linux.
-CC = gcc -std=c11 -Wall
+CC = gcc -std=c17 -Wall -Wpedantic
 
 # on x64 machines do this preparation:
 # sudo apt-get install ia32-libs
@@ -29,13 +29,13 @@ CFLAGS += -m32 -I/usr/include
 endif
 
 # flavors of Linux
-ifeq ($(shell uname),Linux)
+ifeq ($(shell uname), Linux)
 CFLAGS += -DLINUX
 LIBTOOL = ldd
 endif
 
 # OS X wants to be Linux and FreeBSD too.
-ifeq ($(shell uname),Darwin)
+ifeq ($(shell uname), Darwin)
 CFLAGS += -DLINUX
 LIBTOOL = otool
 endif
@@ -68,7 +68,7 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 -include $(GAME_OBJS:.o=.d)
 
 # Build all object files that are out-of-date
-game: $(GAME_OBJS) awakening2/game$(ARCH).$(SHLIBEXT)
+game: $(GAME_OBJS) game$(ARCH).$(SHLIBEXT)
 
 # Main target: depends on all object files
 game$(ARCH).$(SHLIBEXT) : $(GAME_OBJS)

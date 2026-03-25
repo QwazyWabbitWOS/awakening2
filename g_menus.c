@@ -544,12 +544,12 @@ void G_VoteWin(qboolean op_forced)
 			return;
 
 		case VOTE_MAP:
-			strncpy(level.forcemap, g_vote.vstring, sizeof(level.forcemap) - 1);
+			Q_strncpyz(level.forcemap, sizeof level.forcemap, g_vote.vstring);
 			EndDMLevel();
 			break;
 
 		case VOTE_CONFIG:
-			sprintf(text, "exec %s", g_vote.vstring);
+			Com_sprintf(text, sizeof text, "exec %s", g_vote.vstring);
 			gi.AddCommandString(text);
 			break;
 
@@ -587,8 +587,8 @@ void G_VoteWin(qboolean op_forced)
 			if ((int)sv_hook_offhand->value)
 			{
 				item->use = NULL;
-				item->view_model = '\0';
-				item->icon = '\0';
+				item->view_model = "";
+				item->icon = "";
 			}
 			else
 			{
@@ -634,8 +634,8 @@ void G_VoteWin(qboolean op_forced)
 			if (g_vote.vnum)
 			{
 				item->use = NULL;
-				item->view_model = '\0';
-				item->icon = '\0';
+				item->view_model = "";
+				item->icon = "";
 			}
 			else
 			{
@@ -1238,7 +1238,7 @@ void Vote_SettingsApply(edict_t *ent, pmenuhnd_t *p)
 
 	if (ent->client->op_override)
 	{
-		strncpy(g_vote.vmsg, text, sizeof(g_vote.vmsg) - 1);
+		Q_strncpyz(g_vote.vmsg, sizeof g_vote.vmsg, text);
 		g_vote.vote = settings->v_type;
 		result = true;
 	}
@@ -1256,11 +1256,11 @@ void Vote_SettingsApply(edict_t *ent, pmenuhnd_t *p)
 				return;
 
 			case VOTE_MAP:
-				strncpy(g_vote.vstring, settings->g_maplist[settings->map - 1], sizeof(g_vote.vstring) - 1);
+				Q_strncpyz(g_vote.vstring, sizeof g_vote.vstring, settings->g_maplist[settings->map - 1]);
 				break;
 
 			case VOTE_CONFIG:
-				strncpy(g_vote.vstring, settings->g_configlist[settings->config - 1], sizeof(g_vote.vstring) - 1);
+				Q_strncpyz(g_vote.vstring, sizeof g_vote.vstring, settings->g_configlist[settings->config - 1]);
 				break;
 
 			case VOTE_MATCH:
@@ -3118,7 +3118,7 @@ void GMenu_VoteSettings(edict_t *ent, pmenuhnd_t *p)
 				if ((filename[0] == '/') && (filename[1] == '/'))
 					continue;
 
-				settings->g_maplist[settings->g_nmaps++] = strdup(filename);
+				settings->g_maplist[settings->g_nmaps++] = G_CopyString(filename);
 				if (settings->g_nmaps == MAX_MAPS)
 					finished = true;
 			}
@@ -3143,7 +3143,7 @@ void GMenu_VoteSettings(edict_t *ent, pmenuhnd_t *p)
 				if ((filename[0] == '/') && (filename[1] == '/'))
 					continue;
 
-				settings->g_configlist[settings->g_nconfigs++] = strdup(filename);
+				settings->g_configlist[settings->g_nconfigs++] = G_CopyString(filename);
 				if (settings->g_nconfigs == MAX_CONFIGS)
 					finished = true;
 			}
@@ -3582,7 +3582,7 @@ void OpenGameMenu(edict_t *ent)
 				sprintf(msgbuf, "Join %s Team", sv_team1_name->string);
 				gamemenu[gmenu_team].SelectFunc = GMenu_JoinTeam1;
 			}
-			gamemenu[gmenu_team].text = strdup(msgbuf);
+			gamemenu[gmenu_team].text = G_CopyString(msgbuf);
 		}
 		else
 		{
@@ -3671,7 +3671,7 @@ void PrintMOTD(edict_t *ent)
 		while (!finished && (++i < 17))
 		{
 			if (fgets(txt_line, 29, msgstream) != NULL)
-				motd[i].text = strdup(txt_line);
+				motd[i].text = G_CopyString(txt_line);
 			else
 				finished = true;
 		}

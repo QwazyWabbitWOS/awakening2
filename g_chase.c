@@ -106,7 +106,7 @@ void UpdateChaseCam(edict_t *ent)
 
 	targ = ent->client->chase_target;
 	VectorCopy(targ->s.origin, ownerv);
-	VectorCopy(ent->s.origin, oldgoal);
+	_VectorCopy(ent->s.origin, oldgoal); //QW use function here so gcc can see oldgoal is being used.
 	ownerv[2] += targ->viewheight;
 
 //	If in freecam mode, use that angle (SUMFUKA).
@@ -219,7 +219,7 @@ void UpdateChaseCam(edict_t *ent)
 //CW++
 		char s[1024];
 
-		sprintf(s, "xv 0 yb -68 string2 \"Chasing %s\"", targ->client->pers.netname);
+		Com_sprintf(s, sizeof s, "xv 0 yb -68 string2 \"Chasing %s\"", targ->client->pers.netname);
 		gi.WriteByte(svc_layout);
 		gi.WriteString(s);
 		gi.unicast(ent, false);
