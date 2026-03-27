@@ -1521,6 +1521,7 @@ void ClientEndServerFrame(edict_t *ent)
 			PMenu_Do_Update(ent);
 			ent->client->menudirty = false;
 			ent->client->menutime = level.time;
+			gi.unicast(ent, false);
 		}
 //ZOID--
 
@@ -1531,7 +1532,5 @@ void ClientEndServerFrame(edict_t *ent)
 //CW--
 				DeathmatchScoreboardMessage(ent, ent->enemy);
 		}
-
-		gi.unicast(ent, false);
 	}
 }
