@@ -1605,17 +1605,6 @@ void gi_bprintf(int printlevel, char *fmt, ...)
 
 	va_start(argptr, fmt);
 	vsnprintf(bigbuffer, sizeof bigbuffer, fmt, argptr);
-
-//CW++	//r1
-//	Check for overflow.
-
-	if (len > sizeof(bigbuffer))
-	{
-		gi.dprintf("String too long for gi_bprintf().\n");
-		return;
-	}
-//CW--
-
 	va_end(argptr);
 
 	if (dedicated->value)		
