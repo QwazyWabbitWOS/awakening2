@@ -1559,8 +1559,7 @@ qboolean FileExists(char *checkname, filetype_t ftype)
 void gi_cprintf(edict_t *ent, int printlevel, char *fmt, ...)
 {
 	va_list	argptr;
-	static char	bigbuffer[0x10000];
-	int		len;
+	char	bigbuffer[0x1000];
 
 	if (!ent || !ent->inuse || !ent->client)
 		return;
@@ -1570,18 +1569,7 @@ void gi_cprintf(edict_t *ent, int printlevel, char *fmt, ...)
 		return;
 
 	va_start(argptr, fmt);
-	len = vsprintf(bigbuffer, fmt, argptr);
-
-//CW++	//r1
-//	Check for overflow.
-
-	if (len > sizeof(bigbuffer))
-	{
-		gi.dprintf("String too long for gi_bprintf().\n");
-		return;
-	}
-//CW--
-
+	vsnprintf(bigbuffer, sizeof bigbuffer, fmt, argptr); //QW vsnprintf truncates and always zero terminates
 	va_end(argptr);
 
 	gi.cprintf(ent, printlevel, "%s", bigbuffer);													//r1: format string exploit fix
@@ -1591,8 +1579,7 @@ void gi_cprintf(edict_t *ent, int printlevel, char *fmt, ...)
 void gi_centerprintf(edict_t *ent, char *fmt, ...)
 {
 	va_list	argptr;
-	static char	bigbuffer[0x10000];
-	int		len;
+	static char	bigbuffer[0x1000];
 
 	if (!ent || !ent->inuse || !ent->client)
 		return;
@@ -1602,18 +1589,7 @@ void gi_centerprintf(edict_t *ent, char *fmt, ...)
 		return;
 
 	va_start(argptr, fmt);
-	len = vsprintf(bigbuffer, fmt, argptr);
-
-//CW++	//r1
-//	Check for overflow.
-
-	if (len > sizeof(bigbuffer))
-	{
-		gi.dprintf("String too long for gi_bprintf().\n");
-		return;
-	}
-//CW--
-
+	vsnprintf(bigbuffer, sizeof bigbuffer, fmt, argptr); //QW vsnprintf truncates and always zero terminates
 	va_end(argptr);
 
 	gi.centerprintf(ent, "%s", bigbuffer);															//r1: format string exploit fix
@@ -1624,23 +1600,11 @@ void gi_bprintf(int printlevel, char *fmt, ...)
 {
 	edict_t	*ent;
 	va_list	argptr;
-	static char	bigbuffer[0x10000];
-	int		len;
+	static char	bigbuffer[0x1000];
 	int		i;
 
 	va_start(argptr, fmt);
-	len = vsprintf(bigbuffer, fmt, argptr);
-
-//CW++	//r1
-//	Check for overflow.
-
-	if (len > sizeof(bigbuffer))
-	{
-		gi.dprintf("String too long for gi_bprintf().\n");
-		return;
-	}
-//CW--
-
+	vsnprintf(bigbuffer, sizeof bigbuffer, fmt, argptr); //QW vsnprintf truncates and always zero terminates
 	va_end(argptr);
 
 	if (dedicated->value)		
