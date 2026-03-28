@@ -129,11 +129,15 @@
     <ClInclude Include="p_menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GitRevisionInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="game.def">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Makefile" />
+    <None Include="GitRevisionInfo.tmpl" />
   </ItemGroup>
 </Project>

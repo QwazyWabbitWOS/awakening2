@@ -11,9 +11,18 @@
 ARCH := $(shell uname -m | sed -e s/i.86/i386/ \
 	-e s/sun4u/sparc64/ -e s/arm.*/arm/ \
 	-e s/sa110/arm/ -e s/alpha/axp/)
+
+ifndef REV
+    REV := $(shell git rev-list --count HEAD --no-merges)
+endif
+
+ifndef VER
+    VER := r$(REV)~$(shell git rev-parse --short HEAD)
+endif
+
 # On 64-bit OS use the command: setarch i386 make all
 # to obtain the 32-bit binary DLL on 64-bit Linux.
-CC = gcc -std=c17 -Wall -Wpedantic
+CC = gcc -std=c17 -Wall -pedantic
 
 # on x64 machines do this preparation:
 # sudo apt-get install ia32-libs
@@ -39,6 +48,9 @@ ifeq ($(shell uname), Darwin)
 CFLAGS += -DLINUX
 LIBTOOL = otool
 endif
+
+CFLAGS += -DPROJECT_VERSION='"$(VER)"'
+RCFLAGS += -DPROJECT_VERSION='\"$(VER)\"'
 
 SHLIBEXT=so
 

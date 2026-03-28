@@ -152,7 +152,7 @@ void InitGame(void)
 	int		i;
 //CW--
 
-	gi.dprintf("====== Init Game Awakening II v%s %s ======\n\n", AWK_STRING_VERSION, BUILD);
+	gi.dprintf("====== Init Game Awakening II %s %s ======\n\n", PROJECT_VERSION, BUILD);
 
 //CW++
 	gi.dprintf("***********************\n");
@@ -182,6 +182,10 @@ void InitGame(void)
 	sv_cheats = gi.cvar("cheats", "0", CVAR_SERVERINFO | CVAR_LATCH);
 	gi.cvar("gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_LATCH);
 	gi.cvar("gamedate", __DATE__ , CVAR_SERVERINFO | CVAR_LATCH);									//CW
+	
+	// We use 'revision' here because q2pro engine uses 'version' for it's version string.
+	gi.cvar("revision", va("%s", PROJECT_VERSION), CVAR_SERVERINFO);
+
 
 	deathmatch = gi.cvar ("deathmatch", "1", CVAR_LATCH);											//CW
 	maxclients = gi.cvar("maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH);							//CW

@@ -10,6 +10,8 @@
 #include "p_menu.h"																					//ZOID++
 #include "g_chase.h"																				//CW++
 
+#include "GitRevisionInfo.h" // Derived from template via GitWCRev
+
 #ifndef _DEBUG
 #define BUILD	"Release"
 #else
@@ -20,7 +22,7 @@
 #define	GAMEVERSION	"awaken2"																		//CW
 
 //CW++
-#define AWK_VERSION			2.05
+#define AWK_VERSION			2.06
 #define AWK_VSTRING2(x)		#x
 #define AWK_VSTRING(x)		AWK_VSTRING2(x)
 #define AWK_STRING_VERSION	AWK_VSTRING(AWK_VERSION)
