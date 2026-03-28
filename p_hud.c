@@ -218,6 +218,7 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
 		if (sv_gametype->value == G_CTF)															//CW
 		{
 			CTFScoreboardMessage(ent, killer);
+			gi.unicast(ent, true);
 			return;
 		}
 //ZOID--
@@ -226,6 +227,7 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
 		else if ((sv_gametype->value == G_TDM) || (sv_gametype->value == G_ASLT))
 		{
 			TDMScoreboardMessage(ent, killer);
+			gi.unicast(ent, true);
 			return;
 		}
 //CW--
@@ -346,6 +348,7 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
 
 	gi.WriteByte(svc_layout);
 	gi.WriteString(string);
+	gi.unicast(ent, true);
 }
 
 
@@ -366,7 +369,6 @@ void DeathmatchScoreboard(edict_t *ent)
 //Maj--
 
 	DeathmatchScoreboardMessage(ent, ent->enemy);
-	gi.unicast(ent, true);
 }
 
 
