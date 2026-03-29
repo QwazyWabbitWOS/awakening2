@@ -13,7 +13,7 @@
 #pragma once
 
 #ifdef _WIN32
-#define REVISION 9			// Equivalent to git rev-list --count HEAD --no-merges
-#define PROJECT_VERSION "r9~9d5ff65"		// Equivalent to git rev-parse --short HEAD
+#define REVISION 10			// Equivalent to git rev-list --count HEAD --no-merges
+#define PROJECT_VERSION "r10~9ffd277"		// Equivalent to git rev-parse --short HEAD
 #define COPYRIGHT "Copyright 2026"
 #endif
