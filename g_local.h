@@ -10,7 +10,9 @@
 #include "p_menu.h"																					//ZOID++
 #include "g_chase.h"																				//CW++
 
+#ifdef _WIN32
 #include "GitRevisionInfo.h" // Derived from template via GitWCRev
+#endif
 
 #ifndef _DEBUG
 #define BUILD	"Release"
