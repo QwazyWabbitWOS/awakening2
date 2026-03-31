@@ -1,0 +1,1 @@
+GitWCRev.exe . GitRevisionInfo.tmpl GitRevisionInfo.h
