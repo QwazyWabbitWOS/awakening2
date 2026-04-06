@@ -83,7 +83,6 @@ void MoveClientToIntermission(edict_t *ent)
 //Maj--
 
 	DeathmatchScoreboardMessage(ent, NULL);															//CW
-	gi.unicast(ent, true);
 }
 
 void BeginIntermission(edict_t *targ)
@@ -218,7 +217,6 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
 		if (sv_gametype->value == G_CTF)															//CW
 		{
 			CTFScoreboardMessage(ent, killer);
-			gi.unicast(ent, true);
 			return;
 		}
 //ZOID--
@@ -227,7 +225,6 @@ void DeathmatchScoreboardMessage(edict_t *ent, edict_t *killer)
 		else if ((sv_gametype->value == G_TDM) || (sv_gametype->value == G_ASLT))
 		{
 			TDMScoreboardMessage(ent, killer);
-			gi.unicast(ent, true);
 			return;
 		}
 //CW--

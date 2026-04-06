@@ -2239,6 +2239,7 @@ void CTFScoreboardMessage(edict_t *ent, edict_t *killer)
 
 	gi.WriteByte(svc_layout);
 	gi.WriteString(string);
+	gi.unicast(ent, true);
 }
 
 /*------------------------------------------------------------------------*/
@@ -5019,6 +5020,7 @@ void TDMScoreboardMessage(edict_t *ent, edict_t *killer)
 
 	gi.WriteByte(svc_layout);
 	gi.WriteString(string);
+	gi.unicast(ent, true);
 }
 //CW--
 
